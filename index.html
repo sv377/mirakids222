@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+gap: 25px;
+}
+.card {
+background: white;
+border-radius: 20px;
+padding: 18px;
+box-shadow: 0 8px 20px rgba(255,95,162,0.15);
+text-align: center;
+}
+.card img {
+width: 100%;
+border-radius: 16px;
+}
+.card h3 { margin: 12px 0 6px; }
+.card p { font-size: 14px; }
+.price {
+font-size: 18px;
+font-weight: bold;
+color: #ff5fa2;
+margin: 8px 0;
+}
+.btn {
+background: #ffb86c;
+color: #fff;
+padding: 10px 18px;
+border-radius: 20px;
+text-decoration: none;
+font-weight: bold;
+display: inline-block;
+margin-top: 10px;
+}
+.features {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+gap: 20px;
+text-align: center;
+}
+.feature {
+background: #fff;
+border-radius: 20px;
+padding: 20px;
+box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+}
+footer {
+background: #ff5fa2;
+color: white;
+text-align: center;
+padding: 20px;
+margin-top: 40px;
+}
+</style>
+</head>
+<body>
+<header>
+<h1>Mira Kids 🧸</h1>
+<nav>
+<a href="#">Головна</a>
+<a href="#catalog">Іграшки</a>
+<a href="#about">Про нас</a>
+<a href="#contacts">Контакти</a>
+</nav>
+</header>
+
+
+<section class="hero">
+<h2>Яскраві іграшки для щасливих дітей</h2>
+<p>Безпечні • Сучасні • Доставка по всій Україні</p>
+<a class="btn-main" href="#catalog">Обрати іграшку</a>
+</section>
+
+
+<section id="catalog" class="container">
+<h2 class="section">Популярні іграшки</h2>
+<div class="products">
+<div class="card">
+<img src="https://via.placeholder.com/300x220" alt="Іграшка" />
+<h3>Мʼяка іграшка-антистрес</h3>
+<p>Ніжна та приємна, улюблена для обіймів</p>
+<div class="price">349 грн</div>
+<a class="btn" href="https://t.me/mira_sam_s_v" target="_blank">Замовити</a>
+</div>
+<div class="card">
+<img src="https://via.placeholder.com/300x220" alt="Іграшка" />
+<h3>Іграшкова машинка</h3>
+<p>Яскрава та міцна, для активних ігор</p>
+<div class="price">299 грн</div>
+<a class="btn" href="https://t.me/mira_sam_s_v" target="_blank">Замовити</a>
+</div>
+<div class="card">
+<img src="https://via.placeholder.com/300x220" alt="Іграшка" />
+<h3>Розвиваюча іграшка</h3>
+<p>Розвиток логіки та моторики</p>
+<div class="price">399 грн</div>
+<a class="btn" href="https://t.me/mira_sam_s_v" target="_blank">Замовити</a>
+</div>
+<div class="card">
+<img src="https://via.placeholder.com/300x220" alt="Іграшка" />
+<h3>Іграшка для малюків 0+</h3>
+<p>Безпечні матеріали, сертифіковано</p>
+<div class="price">279 грн</div>
+<a class="btn" href="https://t.me/mira_sam_s_v" target="_blank">Замовити</a>
+</div>
+</div>
+</section>
+
+
+<section id="about" class="container">
+<h2 class="section">Чому обирають Mira Kids?</h2>
+<div class="features">
+<div class="feature">🧸 Якісні та безпечні іграшки</div>
+<div class="feature">🚚 Доставка: Нова Пошта / Укрпошта</div>
+<div class="feature">💬 Швидке замовлення через Telegram</div>
+<div class="feature">💛 Працюємо по дропшипінгу</div>
+</div>
+</section>
+
+
+<section id="contacts" class="container">
+<h2 class="section">Замовлення та контакти</h2>
+<p style="text-align:center;font-size:18px;">
+📩 Telegram: <a href="https://t.me/mira_sam_s_v" target="_blank">@mira_sam_s_v</a><br><br>
+🚚 Доставка по Україні<br>
+💳 Оплата: накладений платіж або передоплата
+</p>
+</section>
+
+
+<footer>
+<p>© 2025 Mira Kids — Яскравий світ іграшок</p>
+</footer>
+
+
+</body>
+</html>
