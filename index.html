@@ -60,53 +60,58 @@ const perPage = 12;
 let currentPage = 1;
 const items = [];
 
-function roundNice(price) { const r = Math.round(price); return r % 10 === 9 ? r : r - (r % 10) + 9; }
+function roundNice(price) {
+  const r = Math.round(price);
+  return r % 10 === 9 ? r : r - (r % 10) + 9;
+}
 
 fetch(feedUrl)
   .then(res => res.text())
   .then(str => new DOMParser().parseFromString(str, 'text/xml'))
   .then(data => {
-    const categoriesXML = data.querySelectorAll('categories category');
+    // карта категорій id -> назва
     const categoriesMap = {};
-    categoriesXML.forEach(cat => {
+    data.querySelectorAll('categories category').forEach(cat => {
+      const id = cat.getAttribute('id');
       const name = cat.textContent.trim();
-      if(name) categoriesMap[cat.getAttribute('id')] = name;
+      if (id && name) categoriesMap[id] = name;
     });
 
     const offers = Array.from(data.querySelectorAll('offer'));
-    const categoriesSet = new Set();
+    const usedCategoryIds = new Set();
 
     offers.forEach(offer => {
       const name = offer.querySelector('name')?.textContent || 'Іграшка';
       const rawPrice = parseFloat(offer.querySelector('price')?.textContent || 0);
       const price = roundNice(rawPrice * markup);
       const image = offer.querySelector('picture')?.textContent || '';
-      const categoryId = offer.querySelector('categoryId')?.textContent || '';
-      const category = categoriesMap[categoryId] || null;
-      if(category) categoriesSet.add(category);
+      const categoryId = offer.querySelector('categoryId')?.textContent || 'other';
 
-      let badgeHtml = '<span class="badge">ХІТ</span>';
-      if (rawPrice % 2 === 0) badgeHtml = '<span class="badge sale">АКЦІЯ</span>';
+      if (categoriesMap[categoryId]) usedCategoryIds.add(categoryId);
 
-      items.push({ name, price, image, badgeHtml, category });
+      const badgeHtml = rawPrice % 2 === 0
+        ? '<span class="badge sale">АКЦІЯ</span>'
+        : '<span class="badge">ХІТ</span>';
+
+      items.push({ name, price, image, badgeHtml, categoryId });
     });
 
+    // фільтри
     const filtersDiv = document.querySelector('.filters');
-    filtersDiv.innerHTML = '<button class="filter-btn active" data-filter="all">Усі</button>';
-    categoriesSet.forEach(cat => {
-      if(cat && cat.trim() !== '') {
-        filtersDiv.innerHTML += `<button class="filter-btn" data-filter="${cat}">${cat}</button>`;
-      }
+    filtersDiv.innerHTML = '<button class="filter-btn active" data-id="all">Усі</button>';
+
+    usedCategoryIds.forEach(id => {
+      filtersDiv.innerHTML += `<button class="filter-btn" data-id="${id}">${categoriesMap[id]}</button>`;
     });
 
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    filterButtons.forEach(btn => {
+    // обробка фільтрів
+    document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        filterButtons.forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        const filter = btn.dataset.filter;
+        const filterId = btn.dataset.id;
         document.querySelectorAll('.card').forEach(card => {
-          card.style.display = (filter === 'all' || card.dataset.cat === filter) ? 'block' : 'none';
+          card.style.display = (filterId === 'all' || card.dataset.cat === filterId) ? 'block' : 'none';
         });
       });
     });
@@ -123,17 +128,17 @@ function renderPage(page) {
   container.innerHTML = '';
   const start = (page - 1) * perPage;
   const end = start + perPage;
+
   items.slice(start, end).forEach(item => {
     container.innerHTML += `
-      <div class="card" data-cat="${item.category}">
+      <div class="card" data-cat="${item.categoryId}">
         ${item.badgeHtml}
         <img src="${item.image}" alt="${item.name}">
         <h3>${item.name}</h3>
         <div class="price">${item.price} грн</div>
         <a class="btn" href="https://t.me/mira_sam_s_v" target="_blank">Замовити</a>
         <a class="btn quick" href="https://t.me/mira_sam_s_v?text=Хочу%20замовити:%20${encodeURIComponent(item.name)}" target="_blank">Швидке</a>
-      </div>
-    `;
+      </div>`;
   });
 }
 
@@ -141,12 +146,18 @@ function renderPagination() {
   const pag = document.getElementById('pagination');
   pag.innerHTML = '';
   const pages = Math.ceil(items.length / perPage);
+
   for (let i = 1; i <= pages; i++) {
     const b = document.createElement('button');
     b.textContent = i;
     b.style.background = i === currentPage ? '#ff5fa2' : '#ffd1e6';
     b.style.color = i === currentPage ? '#fff' : '#333';
-    b.onclick = () => { currentPage = i; renderPage(i); renderPagination(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    b.onclick = () => {
+      currentPage = i;
+      renderPage(i);
+      renderPagination();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
     pag.appendChild(b);
   }
 }
