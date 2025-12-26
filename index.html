@@ -2,90 +2,96 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<title>Mira Kids — іграшки</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mira Kids — Іграшки</title>
 
 <style>
 body {
-  font-family: Arial, sans-serif;
-  background: #f7f7f7;
   margin: 0;
-  padding: 0;
+  font-family: Arial, sans-serif;
+  background: #fff7fb;
 }
 
 header {
-  background: #ff6a00;
-  color: #fff;
-  padding: 15px;
+  background: linear-gradient(90deg,#ff7eb3,#ffb86c);
+  padding: 20px;
   text-align: center;
+  color: #fff;
 }
 
-.controls {
+.filters {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
   justify-content: center;
-  margin: 15px;
+  margin: 20px;
 }
 
-select, input {
-  padding: 8px;
-  font-size: 14px;
+.filter-btn {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: none;
+  background: #ffd1e6;
+  cursor: pointer;
+  font-weight: bold;
 }
 
-#resultsInfo {
-  text-align: center;
-  margin: 10px;
-  color: #666;
+.filter-btn.active {
+  background: #ff5fa2;
+  color: #fff;
 }
 
 .products {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
-  padding: 15px;
+  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+  gap: 20px;
+  padding: 20px;
 }
 
-.product {
+.card {
   background: #fff;
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,.1);
+  border-radius: 20px;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
 }
 
-.product img {
+.card img {
   width: 100%;
-  height: 180px;
-  object-fit: contain;
+  border-radius: 14px;
 }
 
-.product h3 {
-  font-size: 14px;
-  margin: 5px 0;
-}
-
-.product .price {
-  color: #ff6a00;
+.price {
   font-weight: bold;
+  color: #ff5fa2;
+}
+
+.badge {
+  background: #ff5fa2;
+  color: #fff;
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
 }
 
 #pagination {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
+  text-align: center;
   margin: 20px;
 }
 
 #pagination button {
-  padding: 6px 10px;
-  border: 1px solid #ddd;
-  background: #fff;
+  margin: 0 4px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: none;
   cursor: pointer;
 }
 
-#pagination button.active {
-  background: #ff6a00;
-  color: #fff;
-  border-color: #ff6a00;
+#resultsInfo {
+  text-align: center;
+  color: #555;
+  margin-top: 10px;
 }
 </style>
 </head>
@@ -96,192 +102,155 @@ select, input {
   <h1>Mira Kids 🧸</h1>
 </header>
 
-<div class="controls">
-  <select id="categorySelect">
-    <option value="">Усі категорії</option>
-  </select>
-
-  <input type="text" id="searchInput" placeholder="Пошук іграшки">
-
-  <select id="sortSelect">
-    <option value="">Сортувати</option>
-    <option value="price_asc">Ціна ↑</option>
-    <option value="price_desc">Ціна ↓</option>
-  </select>
-</div>
-
+<div class="filters" id="filters"></div>
 <div id="resultsInfo"></div>
-
 <div class="products" id="products"></div>
-
 <div id="pagination"></div>
 
 <script>
-const FEED_URL = 'https://toysi.ua/feed-products-residue.php?key=3a1f85868344f5755c1441bfa7846444&vendor_code=prom&lang=ukr';
-
-let allProducts = [];
-let filteredProducts = [];
-let categoriesMap = {};
-
-let currentCategory = '';
+// =====================
+// НАСТРОЙКИ
+// =====================
+const ITEMS_PER_PAGE = 12;
 let currentPage = 1;
-const itemsPerPage = 12;
+let currentCategory = 'all';
+let allProducts = [];
 
-const productsEl = document.getElementById('products');
-const categorySelect = document.getElementById('categorySelect');
-const searchInput = document.getElementById('searchInput');
-const sortSelect = document.getElementById('sortSelect');
+// ⚠️ CORS-PROXY для GitHub Pages
+const FEED_URL =
+  'https://api.allorigins.win/raw?url=' +
+  encodeURIComponent(
+    'https://toysi.ua/feed-products-residue.php?key=3a1f85868344f5755c1441bfa7846444&vendor_code=prom&lang=ukr'
+  );
 
-/* ================= XML LOAD ================= */
-
+// =====================
+// ЗАВАНТАЖЕННЯ XML
+// =====================
 fetch(FEED_URL)
-  .then(res => res.text())
+  .then(r => r.text())
   .then(xmlText => {
     const xml = new DOMParser().parseFromString(xmlText, 'text/xml');
-    parseCategories(xml);
-    parseProducts(xml);
-    buildCategorySelect();
-    filterProducts();
-  });
 
-function parseCategories(xml) {
-  xml.querySelectorAll('category').forEach(cat => {
-    categoriesMap[cat.getAttribute('id')] = cat.textContent.trim();
-  });
-}
-
-function parseProducts(xml) {
-  allProducts = [];
-  xml.querySelectorAll('offer').forEach(item => {
-    const categoryId = item.querySelector('categoryId')?.textContent;
-    if (!categoriesMap[categoryId]) return;
-
-    allProducts.push({
-      id: item.getAttribute('id'),
-      name: item.querySelector('name')?.textContent || '',
-      price: parseFloat(item.querySelector('price')?.textContent || 0),
-      image: item.querySelector('picture')?.textContent || '',
-      categoryId
+    const categoryMap = {};
+    xml.querySelectorAll('category').forEach(c => {
+      categoryMap[c.getAttribute('id')] = c.textContent.trim();
     });
+
+    xml.querySelectorAll('offer').forEach((offer, i) => {
+      const name = offer.querySelector('name')?.textContent || '';
+      const price = offer.querySelector('price')?.textContent || '0';
+      const image = offer.querySelector('picture')?.textContent || '';
+      const catId = offer.querySelector('categoryId')?.textContent || '';
+      const category = categoryMap[catId] || 'Інше';
+
+      allProducts.push({
+        name,
+        price,
+        image,
+        category
+      });
+    });
+
+    renderFilters();
+    render();
+  })
+  .catch(() => {
+    document.getElementById('products').innerHTML =
+      '<p style="color:red;text-align:center;">Не вдалося завантажити товари</p>';
+  });
+
+// =====================
+// ФІЛЬТРИ
+// =====================
+function renderFilters() {
+  const filters = document.getElementById('filters');
+  const categories = [...new Set(allProducts.map(p => p.category))];
+
+  filters.innerHTML = `<button class="filter-btn active" data-cat="all">Усі</button>`;
+
+  categories.forEach(cat => {
+    filters.innerHTML += `<button class="filter-btn" data-cat="${cat}">${cat}</button>`;
+  });
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentCategory = btn.dataset.cat;
+      currentPage = 1;
+      render();
+    };
   });
 }
 
-/* ================= UI ================= */
+// =====================
+// РЕНДЕР
+// =====================
+function render() {
+  const filtered =
+    currentCategory === 'all'
+      ? allProducts
+      : allProducts.filter(p => p.category === currentCategory);
 
-function buildCategorySelect() {
-  const counts = {};
-  allProducts.forEach(p => counts[p.categoryId] = (counts[p.categoryId] || 0) + 1);
+  const start = (currentPage - 1) * ITEMS_PER_PAGE;
+  const end = start + ITEMS_PER_PAGE;
+  const pageItems = filtered.slice(start, end);
 
-  Object.entries(categoriesMap).forEach(([id, name]) => {
-    if (!counts[id]) return;
+  const products = document.getElementById('products');
+  products.innerHTML = '';
 
-    const option = document.createElement('option');
-    option.value = id;
-    option.textContent = `${name} (${counts[id]})`;
-    categorySelect.appendChild(option);
-  });
-}
-
-function renderProducts(list) {
-  productsEl.innerHTML = '';
-  list.forEach(p => {
-    productsEl.innerHTML += `
-      <div class="product">
+  pageItems.forEach(p => {
+    products.innerHTML += `
+      <div class="card">
+        <span class="badge">ХІТ</span>
         <img src="${p.image}">
         <h3>${p.name}</h3>
         <div class="price">${p.price} грн</div>
+        <a href="https://t.me/mira_sam_s_v" target="_blank">Замовити</a>
       </div>
     `;
   });
+
+  renderPagination(filtered.length);
+  renderInfo(filtered.length);
 }
 
-/* ================= FILTER / SEARCH / SORT ================= */
-
-function filterProducts() {
-  filteredProducts = [...allProducts];
-
-  if (currentCategory) {
-    filteredProducts = filteredProducts.filter(p => p.categoryId === currentCategory);
-  }
-
-  if (searchInput.value) {
-    const q = searchInput.value.toLowerCase();
-    filteredProducts = filteredProducts.filter(p => p.name.toLowerCase().includes(q));
-  }
-
-  if (sortSelect.value === 'price_asc') {
-    filteredProducts.sort((a,b) => a.price - b.price);
-  }
-  if (sortSelect.value === 'price_desc') {
-    filteredProducts.sort((a,b) => b.price - a.price);
-  }
-
-  renderResultsInfo(filteredProducts.length);
-  renderPagination(filteredProducts.length);
-
-  const paginated = paginate(filteredProducts);
-  renderProducts(paginated);
-}
-
-function paginate(list) {
-  const start = (currentPage - 1) * itemsPerPage;
-  return list.slice(start, start + itemsPerPage);
-}
-
-/* ================= PAGINATION ================= */
-
+// =====================
+// ПАГІНАЦІЯ
+// =====================
 function renderPagination(total) {
-  const container = document.getElementById('pagination');
-  container.innerHTML = '';
-
-  const pages = Math.ceil(total / itemsPerPage);
-  if (pages <= 1) return;
+  const pages = Math.ceil(total / ITEMS_PER_PAGE);
+  const pag = document.getElementById('pagination');
+  pag.innerHTML = '';
 
   for (let i = 1; i <= pages; i++) {
     const btn = document.createElement('button');
     btn.textContent = i;
-    btn.className = i === currentPage ? 'active' : '';
+    btn.style.background = i === currentPage ? '#ff5fa2' : '#ffd1e6';
+    btn.style.color = i === currentPage ? '#fff' : '#000';
     btn.onclick = () => {
       currentPage = i;
-      filterProducts();
+      render();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
-    container.appendChild(btn);
+    pag.appendChild(btn);
   }
 }
 
-/* ================= INFO ================= */
-
-function renderResultsInfo(total) {
+// =====================
+// ІНФО “Показано 1–12 з …”
+// =====================
+function renderInfo(total) {
   const info = document.getElementById('resultsInfo');
   if (!total) {
     info.textContent = 'Товарів не знайдено';
     return;
   }
-  const start = (currentPage - 1) * itemsPerPage + 1;
-  const end = Math.min(start + itemsPerPage - 1, total);
+  const start = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+  const end = Math.min(start + ITEMS_PER_PAGE - 1, total);
   info.textContent = `Показано ${start}–${end} з ${total}`;
 }
-
-/* ================= EVENTS ================= */
-
-categorySelect.onchange = () => {
-  currentCategory = categorySelect.value;
-  currentPage = 1;
-  filterProducts();
-};
-
-searchInput.oninput = () => {
-  currentPage = 1;
-  filterProducts();
-};
-
-sortSelect.onchange = () => {
-  currentPage = 1;
-  filterProducts();
-};
 </script>
 
 </body>
 </html>
-
