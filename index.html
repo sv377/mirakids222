@@ -75,17 +75,17 @@ fetch(feedUrl)
       const price = roundNice(rawPrice * markup);
       const image = offer.querySelector('picture')?.textContent || '';
 
-      // беремо реальну категорію з XML
-      const category = offer.querySelector('categoryId')?.textContent || 'Інше';
+      // беремо текстову назву категорії з XML
+      const category = offer.querySelector('categoryName')?.textContent || 'Інше';
       categoriesSet.add(category);
 
       let badgeHtml = '<span class="badge">ХІТ</span>';
-      if (rawPrice % 2 === 0) badgeHtml = '<span class="badge sale">АКЦІЯ</span>'; // приклад
+      if (rawPrice % 2 === 0) badgeHtml = '<span class="badge sale">АКЦІЯ</span>';
 
       items.push({ name, price, image, badgeHtml, category });
     });
 
-    // Створюємо кнопки-фільтри динамічно
+    // Створюємо кнопки-фільтри динамічно з текстових категорій
     const filtersDiv = document.querySelector('.filters');
     filtersDiv.innerHTML = '<button class="filter-btn active" data-filter="all">Усі</button>';
     categoriesSet.forEach(cat => {
@@ -145,3 +145,4 @@ function renderPagination() {
 </script>
 </body>
 </html>
+
