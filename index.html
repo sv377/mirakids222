@@ -56,7 +56,7 @@
 <script>
 const feedUrl = "https://mira-feed.tovarievropa.workers.dev/";
 const markup = 1.25;
-const perPage = 25;
+const perPage = 12;
 let currentPage = 1;
 const items = [];
 
@@ -66,17 +66,23 @@ fetch(feedUrl)
   .then(res => res.text())
   .then(str => new DOMParser().parseFromString(str, 'text/xml'))
   .then(data => {
+    // Створюємо словник категорій id -> назва
+    const categoriesXML = data.querySelectorAll('categories category');
+    const categoriesMap = {};
+    categoriesXML.forEach(cat => {
+      categoriesMap[cat.getAttribute('id')] = cat.textContent.trim();
+    });
+
     const offers = Array.from(data.querySelectorAll('offer'));
     const categoriesSet = new Set();
 
-    offers.forEach((offer) => {
+    offers.forEach(offer => {
       const name = offer.querySelector('name')?.textContent || 'Іграшка';
       const rawPrice = parseFloat(offer.querySelector('price')?.textContent || 0);
       const price = roundNice(rawPrice * markup);
       const image = offer.querySelector('picture')?.textContent || '';
-
-      // беремо текстову категорію з тегу <category>
-      const category = offer.querySelector('category')?.textContent || 'Інше';
+      const categoryId = offer.querySelector('categoryId')?.textContent || '';
+      const category = categoriesMap[categoryId] || 'Інше';
       categoriesSet.add(category);
 
       let badgeHtml = '<span class="badge">ХІТ</span>';
@@ -85,14 +91,14 @@ fetch(feedUrl)
       items.push({ name, price, image, badgeHtml, category });
     });
 
-    // Створюємо кнопки-фільтри динамічно з текстових категорій
+    // Створюємо кнопки-фільтри
     const filtersDiv = document.querySelector('.filters');
     filtersDiv.innerHTML = '<button class="filter-btn active" data-filter="all">Усі</button>';
     categoriesSet.forEach(cat => {
       filtersDiv.innerHTML += `<button class="filter-btn" data-filter="${cat}">${cat}</button>`;
     });
 
-    // Обробка фільтрів
+    // Додаємо обробку фільтрів
     const filterButtons = document.querySelectorAll('.filter-btn');
     filterButtons.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -108,7 +114,9 @@ fetch(feedUrl)
     renderPage(currentPage);
     renderPagination();
   })
-  .catch(() => { document.querySelector('.products').innerHTML = '<p>Не вдалося завантажити товари</p>'; });
+  .catch(() => {
+    document.querySelector('.products').innerHTML = '<p>Не вдалося завантажити товари</p>';
+  });
 
 function renderPage(page) {
   const container = document.querySelector('.products');
