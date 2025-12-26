@@ -133,9 +133,8 @@
     <button class="filter-btn" data-filter="edu">Розвиваючі</button>
     <button class="filter-btn" data-filter="toy">Іграшки</button>
   </div>
-  <div class="products">
-  <p style="text-align:center;">Завантаження товарів...</p>
-</div>
+  <div class="products"></div>
+  <div id="pagination" style="text-align:center;margin-top:30px;"></div>
 </section>
 
 <section id="reviews" class="container">
@@ -211,8 +210,12 @@ function roundNice(price) {
   return r % 10 === 9 ? r : r - (r % 10) + 9;
 }
 
+let currentPage = 1;
+const perPage = 20;
+const items = [];
+
 offers.forEach((offer, i) => {
-      if (i >= 20) return;
+      if (i >= 1000) return;
 
       const name = offer.querySelector("name")?.textContent || "";
       const rawPrice = parseFloat(offer.querySelector("price")?.textContent || 0);
@@ -222,17 +225,56 @@ offers.forEach((offer, i) => {
       const badge = i % 3 === 0 ? '<span class="badge">ХІТ</span>' : '<span class="badge sale">АКЦІЯ</span>';
       const category = i % 3 === 0 ? 'baby' : i % 3 === 1 ? 'edu' : 'toy';
 
-      container.innerHTML += `
-        <div class="card" data-cat="${category}">
-          ${badge}
-          <img src="${image}" alt="${name}">
-          <h3>${name}</h3>
-          <div class="price">${price} грн</div>
-          <a class="btn" href="https://t.me/mira_sam_s_v" target="_blank">Замовити</a>
-          <a class="btn quick" href="https://t.me/mira_sam_s_v?text=Хочу%20швидко%20замовити:%20${encodeURIComponent(name)}" target="_blank">Швидке замовлення</a>
-        </div>
-      `;
-    });
+      const badge = i % 3 === 0 ? '<span class="badge">ХІТ</span>' : '<span class="badge sale">АКЦІЯ</span>';
+      const category = i % 3 === 0 ? 'baby' : i % 3 === 1 ? 'edu' : 'toy';
+
+      items.push({ name, image, price, badge, category });
+
+function renderPage(page) {
+  container.innerHTML = '';
+  const start = (page - 1) * perPage;
+  const end = start + perPage;
+
+  items.slice(start, end).forEach(item => {
+    container.innerHTML += `
+      <div class="card" data-cat="${item.category}">
+        ${item.badge}
+        <img src="${item.image}" alt="${item.name}">
+        <h3>${item.name}</h3>
+        <div class="price">${item.price} грн</div>
+        <a class="btn" href="https://t.me/mira_sam_s_v" target="_blank">Замовити</a>
+        <a class="btn quick" href="https://t.me/mira_sam_s_v?text=Хочу%20швидко%20замовити:%20${encodeURIComponent(item.name)}" target="_blank">Швидке замовлення</a>
+      </div>`;
+  });
+}
+
+function renderPagination() {
+  const pages = Math.ceil(items.length / perPage);
+  const pag = document.getElementById('pagination');
+  pag.innerHTML = '';
+  for (let i = 1; i <= pages; i++) {
+    const btn = document.createElement('button');
+    btn.textContent = i;
+    btn.style.margin = '0 5px';
+    btn.style.padding = '8px 14px';
+    btn.style.borderRadius = '12px';
+    btn.style.border = 'none';
+    btn.style.cursor = 'pointer';
+    btn.style.background = i === currentPage ? '#ff5fa2' : '#ffd1e6';
+    btn.style.color = i === currentPage ? '#fff' : '#333';
+    btn.onclick = () => {
+      currentPage = i;
+      renderPage(currentPage);
+      renderPagination();
+      window.scrollTo({ top: document.getElementById('catalog').offsetTop, behavior: 'smooth' });
+    };
+    pag.appendChild(btn);
+  }
+}
+
+renderPage(currentPage);
+renderPagination();
+});
   })
   .catch(() => {
     document.querySelector('.products').innerHTML = '<p style="text-align:center;color:red;">Не вдалося завантажити товари</p>';
@@ -252,4 +294,3 @@ filterButtons.forEach(btn => {
 </script>
 </body>
 </html>
-
