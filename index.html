@@ -66,11 +66,11 @@ fetch(feedUrl)
   .then(res => res.text())
   .then(str => new DOMParser().parseFromString(str, 'text/xml'))
   .then(data => {
-    // Створюємо словник категорій id -> назва
     const categoriesXML = data.querySelectorAll('categories category');
     const categoriesMap = {};
     categoriesXML.forEach(cat => {
-      categoriesMap[cat.getAttribute('id')] = cat.textContent.trim();
+      const name = cat.textContent.trim();
+      if(name) categoriesMap[cat.getAttribute('id')] = name;
     });
 
     const offers = Array.from(data.querySelectorAll('offer'));
@@ -82,8 +82,8 @@ fetch(feedUrl)
       const price = roundNice(rawPrice * markup);
       const image = offer.querySelector('picture')?.textContent || '';
       const categoryId = offer.querySelector('categoryId')?.textContent || '';
-      const category = categoriesMap[categoryId] || 'Інше';
-      categoriesSet.add(category);
+      const category = categoriesMap[categoryId] || null;
+      if(category) categoriesSet.add(category);
 
       let badgeHtml = '<span class="badge">ХІТ</span>';
       if (rawPrice % 2 === 0) badgeHtml = '<span class="badge sale">АКЦІЯ</span>';
@@ -91,14 +91,14 @@ fetch(feedUrl)
       items.push({ name, price, image, badgeHtml, category });
     });
 
-    // Створюємо кнопки-фільтри
     const filtersDiv = document.querySelector('.filters');
     filtersDiv.innerHTML = '<button class="filter-btn active" data-filter="all">Усі</button>';
     categoriesSet.forEach(cat => {
-      filtersDiv.innerHTML += `<button class="filter-btn" data-filter="${cat}">${cat}</button>`;
+      if(cat && cat.trim() !== '') {
+        filtersDiv.innerHTML += `<button class="filter-btn" data-filter="${cat}">${cat}</button>`;
+      }
     });
 
-    // Додаємо обробку фільтрів
     const filterButtons = document.querySelectorAll('.filter-btn');
     filterButtons.forEach(btn => {
       btn.addEventListener('click', () => {
