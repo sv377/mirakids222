@@ -56,7 +56,7 @@
 <script>
 const feedUrl = "https://mira-feed.tovarievropa.workers.dev/";
 const markup = 1.25;
-const perPage = 12;
+const perPage = 25;
 let currentPage = 1;
 const items = [];
 
@@ -75,8 +75,8 @@ fetch(feedUrl)
       const price = roundNice(rawPrice * markup);
       const image = offer.querySelector('picture')?.textContent || '';
 
-      // беремо текстову назву категорії з XML
-      const category = offer.querySelector('categoryName')?.textContent || 'Інше';
+      // беремо текстову категорію з тегу <category>
+      const category = offer.querySelector('category')?.textContent || 'Інше';
       categoriesSet.add(category);
 
       let badgeHtml = '<span class="badge">ХІТ</span>';
@@ -145,4 +145,3 @@ function renderPagination() {
 </script>
 </body>
 </html>
-
