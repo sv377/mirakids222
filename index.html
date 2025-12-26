@@ -4,117 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mira Kids — Яскравий магазин іграшок</title>
-
   <style>
-    body {
-      margin: 0;
-      font-family: "Comic Sans MS", Arial, sans-serif;
-      background: #fff7fb;
-      color: #333;
-    }
-    header {
-      background: linear-gradient(90deg, #ff7eb3, #ffb86c);
-      padding: 20px;
-      text-align: center;
-      color: white;
-    }
-    header h1 { margin: 0; font-size: 34px; }
-    nav a {
-      margin: 0 10px;
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .hero {
-      text-align: center;
-      padding: 40px 20px;
-    }
-    .btn-main {
-      background: #ff5fa2;
-      color: white;
-      padding: 14px 24px;
-      border-radius: 30px;
-      text-decoration: none;
-      display: inline-block;
-      margin-top: 20px;
-    }
-    .container {
-      max-width: 1100px;
-      margin: auto;
-      padding: 30px 20px;
-    }
-    .filters {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-    .filter-btn {
-      padding: 8px 16px;
-      border-radius: 20px;
-      border: none;
-      background: #ffd1e6;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .filter-btn.active {
-      background: #ff5fa2;
-      color: white;
-    }
-    .products {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-    }
-    .card {
-      background: white;
-      border-radius: 20px;
-      padding: 15px;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-      text-align: center;
-      position: relative;
-    }
-    .badge {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: #ff5fa2;
-      color: white;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-    .badge.sale {
-      background: #ffb86c;
-    }
-    .card img {
-      width: 100%;
-      border-radius: 15px;
-    }
-    .price {
-      font-size: 18px;
-      color: #ff5fa2;
-      font-weight: bold;
-    }
-    .btn {
-      background: #ffb86c;
-      color: white;
-      padding: 8px 16px;
-      border-radius: 20px;
-      text-decoration: none;
-      display: inline-block;
-      margin-top: 6px;
-    }
-    .btn.quick {
-      background: #ff5fa2;
-    }
+    body { margin:0; font-family: Arial, sans-serif; background:#fff7fb; color:#333; }
+    header { background: linear-gradient(90deg, #ff7eb3, #ffb86c); padding:20px; text-align:center; color:white; }
+    header h1 { margin:0; font-size:34px; }
+    nav a { margin:0 10px; color:white; text-decoration:none; font-weight:bold; }
+    .hero { text-align:center; padding:40px 20px; }
+    .btn-main { background:#ff5fa2; color:white; padding:14px 24px; border-radius:30px; text-decoration:none; display:inline-block; margin-top:20px; }
+    .container { max-width:1100px; margin:auto; padding:30px 20px; }
+    .filters { display:flex; gap:10px; justify-content:center; margin-bottom:20px; flex-wrap:wrap; }
+    .filter-btn { padding:8px 16px; border-radius:20px; border:none; background:#ffd1e6; cursor:pointer; font-weight:bold; }
+    .filter-btn.active { background:#ff5fa2; color:white; }
+    .products { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; }
+    .card { background:white; border-radius:20px; padding:15px; box-shadow:0 6px 15px rgba(0,0,0,0.1); text-align:center; position:relative; }
+    .badge { position:absolute; top:10px; left:10px; background:#ff5fa2; color:white; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold; }
+    .badge.sale { background:#ffb86c; }
+    .card img { width:100%; border-radius:15px; }
+    .price { font-size:18px; color:#ff5fa2; font-weight:bold; margin:8px 0; }
+    .btn { display:block; background:#ffb86c; color:white; padding:8px 16px; border-radius:20px; text-decoration:none; margin-top:6px; }
+    .btn.quick { background:#ff5fa2; }
+    #pagination button { font-size:14px; margin:0 5px; padding:8px 14px; border:none; border-radius:12px; cursor:pointer; }
   </style>
 </head>
-
 <body>
-
 <header>
   <h1>Mira Kids 🧸</h1>
   <nav>
@@ -123,42 +35,24 @@
     <a href="#contacts">Контакти</a>
   </nav>
 </header>
-
 <section class="hero">
   <h2>Яскраві іграшки для щасливих дітей</h2>
   <a class="btn-main" href="#catalog">Обрати іграшку</a>
 </section>
-
 <section id="catalog" class="container">
   <h2>Каталог</h2>
-
-  <div class="filters">
-    <button class="filter-btn active" data-filter="all">Усі</button>
-    <button class="filter-btn" data-filter="baby">Для малюків</button>
-    <button class="filter-btn" data-filter="edu">Розвиваючі</button>
-    <button class="filter-btn" data-filter="toy">Іграшки</button>
-  </div>
-
+  <div class="filters"></div>
   <div class="products"></div>
-  <div id="pagination" style="text-align:center;margin-top:20px;"></div>
+  <div id="pagination"></div>
 </section>
-
 <section id="payment" class="container">
   <h2>Оплата і доставка</h2>
-  <p>
-    🚚 Нова Пошта / Укрпошта<br>
-    💳 Накладений платіж або передоплата<br>
-    📦 Дропшипінг
-  </p>
+  <p>🚚 Нова Пошта / Укрпошта<br>💳 Накладений платіж або передоплата<br>📦 Дропшипінг</p>
 </section>
-
 <section id="contacts" class="container">
   <h2>Контакти</h2>
-  <p>
-    Telegram: <a href="https://t.me/mira_sam_s_v" target="_blank">@mira_sam_s_v</a>
-  </p>
+  <p>Telegram: <a href="https://t.me/mira_sam_s_v" target="_blank">@mira_sam_s_v</a></p>
 </section>
-
 <script>
 const feedUrl = "https://mira-feed.tovarievropa.workers.dev/";
 const markup = 1.25;
@@ -166,50 +60,66 @@ const perPage = 12;
 let currentPage = 1;
 const items = [];
 
-function roundNice(price) {
-  const r = Math.round(price);
-  return r % 10 === 9 ? r : r - (r % 10) + 9;
-}
+function roundNice(price) { const r = Math.round(price); return r % 10 === 9 ? r : r - (r % 10) + 9; }
 
 fetch(feedUrl)
   .then(res => res.text())
-  .then(xml => new DOMParser().parseFromString(xml, "text/xml"))
+  .then(str => new DOMParser().parseFromString(str, 'text/xml'))
   .then(data => {
-    const offers = data.querySelectorAll("offer");
-    offers.forEach((offer, i) => {
-      const name = offer.querySelector("name")?.textContent || "Іграшка";
-      const rawPrice = parseFloat(offer.querySelector("price")?.textContent || 0);
+    const offers = Array.from(data.querySelectorAll('offer'));
+    const categoriesSet = new Set();
+
+    offers.forEach((offer) => {
+      const name = offer.querySelector('name')?.textContent || 'Іграшка';
+      const rawPrice = parseFloat(offer.querySelector('price')?.textContent || 0);
       const price = roundNice(rawPrice * markup);
-      const image = offer.querySelector("picture")?.textContent || "";
+      const image = offer.querySelector('picture')?.textContent || '';
 
-      let badgeHtml = i % 3 === 0
-        ? '<span class="badge">ХІТ</span>'
-        : '<span class="badge sale">АКЦІЯ</span>';
+      // беремо реальну категорію з XML
+      const category = offer.querySelector('categoryId')?.textContent || 'Інше';
+      categoriesSet.add(category);
 
-      let category = i % 3 === 0 ? "baby" : i % 3 === 1 ? "edu" : "toy";
+      let badgeHtml = '<span class="badge">ХІТ</span>';
+      if (rawPrice % 2 === 0) badgeHtml = '<span class="badge sale">АКЦІЯ</span>'; // приклад
 
       items.push({ name, price, image, badgeHtml, category });
     });
 
-    renderPage(1);
+    // Створюємо кнопки-фільтри динамічно
+    const filtersDiv = document.querySelector('.filters');
+    filtersDiv.innerHTML = '<button class="filter-btn active" data-filter="all">Усі</button>';
+    categoriesSet.forEach(cat => {
+      filtersDiv.innerHTML += `<button class="filter-btn" data-filter="${cat}">${cat}</button>`;
+    });
+
+    // Обробка фільтрів
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = btn.dataset.filter;
+        document.querySelectorAll('.card').forEach(card => {
+          card.style.display = (filter === 'all' || card.dataset.cat === filter) ? 'block' : 'none';
+        });
+      });
+    });
+
+    renderPage(currentPage);
     renderPagination();
   })
-  .catch(() => {
-    document.querySelector(".products").innerHTML =
-      "<p>Не вдалося завантажити товари</p>";
-  });
+  .catch(() => { document.querySelector('.products').innerHTML = '<p>Не вдалося завантажити товари</p>'; });
 
 function renderPage(page) {
-  const container = document.querySelector(".products");
-  container.innerHTML = "";
+  const container = document.querySelector('.products');
+  container.innerHTML = '';
   const start = (page - 1) * perPage;
   const end = start + perPage;
-
   items.slice(start, end).forEach(item => {
     container.innerHTML += `
       <div class="card" data-cat="${item.category}">
         ${item.badgeHtml}
-        <img src="${item.image}">
+        <img src="${item.image}" alt="${item.name}">
         <h3>${item.name}</h3>
         <div class="price">${item.price} грн</div>
         <a class="btn" href="https://t.me/mira_sam_s_v" target="_blank">Замовити</a>
@@ -220,23 +130,18 @@ function renderPage(page) {
 }
 
 function renderPagination() {
-  const pag = document.getElementById("pagination");
-  pag.innerHTML = "";
+  const pag = document.getElementById('pagination');
+  pag.innerHTML = '';
   const pages = Math.ceil(items.length / perPage);
-
   for (let i = 1; i <= pages; i++) {
-    const b = document.createElement("button");
+    const b = document.createElement('button');
     b.textContent = i;
-    b.onclick = () => {
-      currentPage = i;
-      renderPage(i);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    };
+    b.style.background = i === currentPage ? '#ff5fa2' : '#ffd1e6';
+    b.style.color = i === currentPage ? '#fff' : '#333';
+    b.onclick = () => { currentPage = i; renderPage(i); renderPagination(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
     pag.appendChild(b);
   }
 }
 </script>
-
 </body>
 </html>
-
