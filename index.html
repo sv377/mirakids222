@@ -1,164 +1,286 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mira Kids — Яскравий магазин іграшок</title>
-  <style>
-    body { margin:0; font-family: Arial, sans-serif; background:#fff7fb; color:#333; }
-    header { background: linear-gradient(90deg, #ff7eb3, #ffb86c); padding:20px; text-align:center; color:white; }
-    header h1 { margin:0; font-size:34px; }
-    nav a { margin:0 10px; color:white; text-decoration:none; font-weight:bold; }
-    .hero { text-align:center; padding:40px 20px; }
-    .btn-main { background:#ff5fa2; color:white; padding:14px 24px; border-radius:30px; text-decoration:none; display:inline-block; margin-top:20px; }
-    .container { max-width:1100px; margin:auto; padding:30px 20px; }
-    .filters { display:flex; gap:10px; justify-content:center; margin-bottom:20px; flex-wrap:wrap; }
-    .filter-btn { padding:8px 16px; border-radius:20px; border:none; background:#ffd1e6; cursor:pointer; font-weight:bold; }
-    .filter-btn.active { background:#ff5fa2; color:white; }
-    .products { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; }
-    .card { background:white; border-radius:20px; padding:15px; box-shadow:0 6px 15px rgba(0,0,0,0.1); text-align:center; position:relative; }
-    .badge { position:absolute; top:10px; left:10px; background:#ff5fa2; color:white; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold; }
-    .badge.sale { background:#ffb86c; }
-    .card img { width:100%; border-radius:15px; }
-    .price { font-size:18px; color:#ff5fa2; font-weight:bold; margin:8px 0; }
-    .btn { display:block; background:#ffb86c; color:white; padding:8px 16px; border-radius:20px; text-decoration:none; margin-top:6px; }
-    .btn.quick { background:#ff5fa2; }
-    #pagination button { font-size:14px; margin:0 5px; padding:8px 14px; border:none; border-radius:12px; cursor:pointer; }
-  </style>
+<meta charset="UTF-8">
+<title>Mira Kids — іграшки</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f7f7f7;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background: #ff6a00;
+  color: #fff;
+  padding: 15px;
+  text-align: center;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 15px;
+}
+
+select, input {
+  padding: 8px;
+  font-size: 14px;
+}
+
+#resultsInfo {
+  text-align: center;
+  margin: 10px;
+  color: #666;
+}
+
+.products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  padding: 15px;
+}
+
+.product {
+  background: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,.1);
+}
+
+.product img {
+  width: 100%;
+  height: 180px;
+  object-fit: contain;
+}
+
+.product h3 {
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+.product .price {
+  color: #ff6a00;
+  font-weight: bold;
+}
+
+#pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 20px;
+}
+
+#pagination button {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+}
+
+#pagination button.active {
+  background: #ff6a00;
+  color: #fff;
+  border-color: #ff6a00;
+}
+</style>
 </head>
+
 <body>
+
 <header>
   <h1>Mira Kids 🧸</h1>
-  <nav>
-    <a href="#catalog">Іграшки</a>
-    <a href="#payment">Оплата і доставка</a>
-    <a href="#contacts">Контакти</a>
-  </nav>
 </header>
-<section class="hero">
-  <h2>Яскраві іграшки для щасливих дітей</h2>
-  <a class="btn-main" href="#catalog">Обрати іграшку</a>
-</section>
-<section id="catalog" class="container">
-  <h2>Каталог</h2>
-  <div class="filters">
-  <select id="categorySelect" class="filter-btn"></select>
+
+<div class="controls">
+  <select id="categorySelect">
+    <option value="">Усі категорії</option>
+  </select>
+
+  <input type="text" id="searchInput" placeholder="Пошук іграшки">
+
+  <select id="sortSelect">
+    <option value="">Сортувати</option>
+    <option value="price_asc">Ціна ↑</option>
+    <option value="price_desc">Ціна ↓</option>
+  </select>
 </div>
-  <div class="products"></div>
-  <div id="pagination"></div>
-</section>
-<section id="payment" class="container">
-  <h2>Оплата і доставка</h2>
-  <p>🚚 Нова Пошта / Укрпошта<br>💳 Накладений платіж або передоплата<br>📦 Дропшипінг</p>
-</section>
-<section id="contacts" class="container">
-  <h2>Контакти</h2>
-  <p>Telegram: <a href="https://t.me/mira_sam_s_v" target="_blank">@mira_sam_s_v</a></p>
-</section>
+
+<div id="resultsInfo"></div>
+
+<div class="products" id="products"></div>
+
+<div id="pagination"></div>
+
 <script>
-const feedUrl = "https://mira-feed.tovarievropa.workers.dev/";
-const markup = 1.25;
-const perPage = 12;
+const FEED_URL = 'https://toysi.ua/feed-products-residue.php?key=3a1f85868344f5755c1441bfa7846444&vendor_code=prom&lang=ukr';
+
+let allProducts = [];
+let filteredProducts = [];
+let categoriesMap = {};
+
+let currentCategory = '';
 let currentPage = 1;
-const items = [];
+const itemsPerPage = 12;
 
-function roundNice(price) {
-  const r = Math.round(price);
-  return r % 10 === 9 ? r : r - (r % 10) + 9;
-}
+const productsEl = document.getElementById('products');
+const categorySelect = document.getElementById('categorySelect');
+const searchInput = document.getElementById('searchInput');
+const sortSelect = document.getElementById('sortSelect');
 
-fetch(feedUrl)
+/* ================= XML LOAD ================= */
+
+fetch(FEED_URL)
   .then(res => res.text())
-  .then(str => new DOMParser().parseFromString(str, 'text/xml'))
-  .then(data => {
-    const categoriesMap = {};
-    data.querySelectorAll('categories category').forEach(cat => {
-      const id = cat.getAttribute('id');
-      const name = cat.textContent.trim();
-      if (id && name) categoriesMap[id] = name;
-    });
-
-    const offers = Array.from(data.querySelectorAll('offer'));
-    const categoryCount = {};
-
-    offers.forEach(offer => {
-      const name = offer.querySelector('name')?.textContent || 'Іграшка';
-      const rawPrice = parseFloat(offer.querySelector('price')?.textContent || 0);
-      const price = roundNice(rawPrice * markup);
-      const image = offer.querySelector('picture')?.textContent || '';
-      const categoryId = offer.querySelector('categoryId')?.textContent || null;
-
-      if (categoryId && categoriesMap[categoryId]) {
-        categoryCount[categoryId] = (categoryCount[categoryId] || 0) + 1;
-      }
-
-      const badgeHtml = rawPrice % 2 === 0
-        ? '<span class="badge sale">АКЦІЯ</span>'
-        : '<span class="badge">ХІТ</span>';
-
-      items.push({ name, price, image, badgeHtml, categoryId });
-    });
-
-    // dropdown категорій з лічильником
-    const select = document.getElementById('categorySelect');
-    select.innerHTML = '<option value="all">Усі іграшки</option>';
-
-    Object.keys(categoryCount).forEach(id => {
-      select.innerHTML += `<option value="${id}">${categoriesMap[id]} (${categoryCount[id]})</option>`;
-    });
-
-    select.addEventListener('change', () => {
-      const val = select.value;
-      document.querySelectorAll('.card').forEach(card => {
-        card.style.display = (val === 'all' || card.dataset.cat === val) ? 'block' : 'none';
-      });
-    });
-
-    renderPage(currentPage);
-    renderPagination();
-  })
-  .catch(() => {
-    document.querySelector('.products').innerHTML = '<p>Не вдалося завантажити товари</p>';
+  .then(xmlText => {
+    const xml = new DOMParser().parseFromString(xmlText, 'text/xml');
+    parseCategories(xml);
+    parseProducts(xml);
+    buildCategorySelect();
+    filterProducts();
   });
 
-function renderPage(page) {
-  const container = document.querySelector('.products');
-  container.innerHTML = '';
-  const start = (page - 1) * perPage;
-  const end = start + perPage;
-
-  items.slice(start, end).forEach(item => {
-    container.innerHTML += `
-      <div class="card" data-cat="${item.categoryId}">
-        ${item.badgeHtml}
-        <img src="${item.image}" alt="${item.name}">
-        <h3>${item.name}</h3>
-        <div class="price">${item.price} грн</div>
-        <a class="btn" href="https://t.me/mira_sam_s_v" target="_blank">Замовити</a>
-        <a class="btn quick" href="https://t.me/mira_sam_s_v?text=Хочу%20замовити:%20${encodeURIComponent(item.name)}" target="_blank">Швидке</a>
-      </div>`;
+function parseCategories(xml) {
+  xml.querySelectorAll('category').forEach(cat => {
+    categoriesMap[cat.getAttribute('id')] = cat.textContent.trim();
   });
 }
 
-function renderPagination() {
-  const pag = document.getElementById('pagination');
-  pag.innerHTML = '';
-  const pages = Math.ceil(items.length / perPage);
+function parseProducts(xml) {
+  allProducts = [];
+  xml.querySelectorAll('offer').forEach(item => {
+    const categoryId = item.querySelector('categoryId')?.textContent;
+    if (!categoriesMap[categoryId]) return;
+
+    allProducts.push({
+      id: item.getAttribute('id'),
+      name: item.querySelector('name')?.textContent || '',
+      price: parseFloat(item.querySelector('price')?.textContent || 0),
+      image: item.querySelector('picture')?.textContent || '',
+      categoryId
+    });
+  });
+}
+
+/* ================= UI ================= */
+
+function buildCategorySelect() {
+  const counts = {};
+  allProducts.forEach(p => counts[p.categoryId] = (counts[p.categoryId] || 0) + 1);
+
+  Object.entries(categoriesMap).forEach(([id, name]) => {
+    if (!counts[id]) return;
+
+    const option = document.createElement('option');
+    option.value = id;
+    option.textContent = `${name} (${counts[id]})`;
+    categorySelect.appendChild(option);
+  });
+}
+
+function renderProducts(list) {
+  productsEl.innerHTML = '';
+  list.forEach(p => {
+    productsEl.innerHTML += `
+      <div class="product">
+        <img src="${p.image}">
+        <h3>${p.name}</h3>
+        <div class="price">${p.price} грн</div>
+      </div>
+    `;
+  });
+}
+
+/* ================= FILTER / SEARCH / SORT ================= */
+
+function filterProducts() {
+  filteredProducts = [...allProducts];
+
+  if (currentCategory) {
+    filteredProducts = filteredProducts.filter(p => p.categoryId === currentCategory);
+  }
+
+  if (searchInput.value) {
+    const q = searchInput.value.toLowerCase();
+    filteredProducts = filteredProducts.filter(p => p.name.toLowerCase().includes(q));
+  }
+
+  if (sortSelect.value === 'price_asc') {
+    filteredProducts.sort((a,b) => a.price - b.price);
+  }
+  if (sortSelect.value === 'price_desc') {
+    filteredProducts.sort((a,b) => b.price - a.price);
+  }
+
+  renderResultsInfo(filteredProducts.length);
+  renderPagination(filteredProducts.length);
+
+  const paginated = paginate(filteredProducts);
+  renderProducts(paginated);
+}
+
+function paginate(list) {
+  const start = (currentPage - 1) * itemsPerPage;
+  return list.slice(start, start + itemsPerPage);
+}
+
+/* ================= PAGINATION ================= */
+
+function renderPagination(total) {
+  const container = document.getElementById('pagination');
+  container.innerHTML = '';
+
+  const pages = Math.ceil(total / itemsPerPage);
+  if (pages <= 1) return;
 
   for (let i = 1; i <= pages; i++) {
-    const b = document.createElement('button');
-    b.textContent = i;
-    b.style.background = i === currentPage ? '#ff5fa2' : '#ffd1e6';
-    b.style.color = i === currentPage ? '#fff' : '#333';
-    b.onclick = () => {
+    const btn = document.createElement('button');
+    btn.textContent = i;
+    btn.className = i === currentPage ? 'active' : '';
+    btn.onclick = () => {
       currentPage = i;
-      renderPage(i);
-      renderPagination();
+      filterProducts();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
-    pag.appendChild(b);
+    container.appendChild(btn);
   }
 }
+
+/* ================= INFO ================= */
+
+function renderResultsInfo(total) {
+  const info = document.getElementById('resultsInfo');
+  if (!total) {
+    info.textContent = 'Товарів не знайдено';
+    return;
+  }
+  const start = (currentPage - 1) * itemsPerPage + 1;
+  const end = Math.min(start + itemsPerPage - 1, total);
+  info.textContent = `Показано ${start}–${end} з ${total}`;
+}
+
+/* ================= EVENTS ================= */
+
+categorySelect.onchange = () => {
+  currentCategory = categorySelect.value;
+  currentPage = 1;
+  filterProducts();
+};
+
+searchInput.oninput = () => {
+  currentPage = 1;
+  filterProducts();
+};
+
+sortSelect.onchange = () => {
+  currentPage = 1;
+  filterProducts();
+};
 </script>
+
 </body>
 </html>
