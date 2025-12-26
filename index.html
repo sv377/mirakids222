@@ -41,7 +41,9 @@
 </section>
 <section id="catalog" class="container">
   <h2>Каталог</h2>
-  <div class="filters"></div>
+  <div class="filters">
+  <select id="categorySelect" class="filter-btn"></select>
+</div>
   <div class="products"></div>
   <div id="pagination"></div>
 </section>
@@ -69,7 +71,6 @@ fetch(feedUrl)
   .then(res => res.text())
   .then(str => new DOMParser().parseFromString(str, 'text/xml'))
   .then(data => {
-    // карта категорій id -> назва
     const categoriesMap = {};
     data.querySelectorAll('categories category').forEach(cat => {
       const id = cat.getAttribute('id');
@@ -78,16 +79,18 @@ fetch(feedUrl)
     });
 
     const offers = Array.from(data.querySelectorAll('offer'));
-    const usedCategoryIds = new Set();
+    const categoryCount = {};
 
     offers.forEach(offer => {
       const name = offer.querySelector('name')?.textContent || 'Іграшка';
       const rawPrice = parseFloat(offer.querySelector('price')?.textContent || 0);
       const price = roundNice(rawPrice * markup);
       const image = offer.querySelector('picture')?.textContent || '';
-      const categoryId = offer.querySelector('categoryId')?.textContent || 'other';
+      const categoryId = offer.querySelector('categoryId')?.textContent || null;
 
-      if (categoriesMap[categoryId]) usedCategoryIds.add(categoryId);
+      if (categoryId && categoriesMap[categoryId]) {
+        categoryCount[categoryId] = (categoryCount[categoryId] || 0) + 1;
+      }
 
       const badgeHtml = rawPrice % 2 === 0
         ? '<span class="badge sale">АКЦІЯ</span>'
@@ -96,23 +99,18 @@ fetch(feedUrl)
       items.push({ name, price, image, badgeHtml, categoryId });
     });
 
-    // фільтри
-    const filtersDiv = document.querySelector('.filters');
-    filtersDiv.innerHTML = '<button class="filter-btn active" data-id="all">Усі</button>';
+    // dropdown категорій з лічильником
+    const select = document.getElementById('categorySelect');
+    select.innerHTML = '<option value="all">Усі іграшки</option>';
 
-    usedCategoryIds.forEach(id => {
-      filtersDiv.innerHTML += `<button class="filter-btn" data-id="${id}">${categoriesMap[id]}</button>`;
+    Object.keys(categoryCount).forEach(id => {
+      select.innerHTML += `<option value="${id}">${categoriesMap[id]} (${categoryCount[id]})</option>`;
     });
 
-    // обробка фільтрів
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const filterId = btn.dataset.id;
-        document.querySelectorAll('.card').forEach(card => {
-          card.style.display = (filterId === 'all' || card.dataset.cat === filterId) ? 'block' : 'none';
-        });
+    select.addEventListener('change', () => {
+      const val = select.value;
+      document.querySelectorAll('.card').forEach(card => {
+        card.style.display = (val === 'all' || card.dataset.cat === val) ? 'block' : 'none';
       });
     });
 
